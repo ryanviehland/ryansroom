@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Businesses & Offers</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general layout */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .message-box {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* Green for success */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        .message-box.error {
+            background-color: #f44336; /* Red for error */
+        }
+
+        /* Basic styling for forms in modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            overflow-y: auto; /* Allow scrolling for long forms */
+            max-height: 90vh; /* Limit modal height */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <div id="message-box" class="message-box"></div>
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white p-4 shadow-md">
+        <div class="container mx-auto flex flex-col sm:flex-row items-center justify-between">
+            <h1 class="text-3xl font-bold mb-2 sm:mb-0">Local Deals</h1>
+            <div class="flex items-center space-x-4">
+                <!-- User ID display removed as Firebase is no longer used -->
+                <button id="add-business-btn" class="bg-indigo-700 hover:bg-indigo-800 text-white py-2 px-4 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    Add Business
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto p-4 flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Business List Section -->
+        <section class="md:col-span-1 bg-white p-4 rounded-lg shadow-md flex flex-col">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Businesses</h2>
+            <div class="mb-4">
+                <input
+                    type="text"
+                    id="search-input"
+                    placeholder="Search businesses..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+            </div>
+            <div id="loading-spinner" class="text-center text-indigo-600 font-medium py-4 hidden">
+                Loading businesses...
+            </div>
+            <div id="business-list" class="space-y-4 overflow-y-auto flex-grow pr-2">
+                <!-- Business cards will be dynamically loaded here -->
+            </div>
+            <!-- Moved no-businesses-message outside of business-list div -->
+            <p id="no-businesses-message" class="text-gray-500 text-center hidden mt-4">No businesses found. Be the first to add one!</p>
+        </section>
+
+        <!-- Business Detail Section -->
+        <section class="md:col-span-2 bg-white p-4 rounded-lg shadow-md flex flex-col">
+            <div id="business-detail-empty" class="text-center text-gray-500 py-20">
+                <p class="text-lg">Select a business from the left to view its details and offers.</p>
+            </div>
+            <div id="business-detail" class="hidden">
+                <div class="flex items-start justify-between mb-4">
+                    <h2 id="detail-business-name" class="text-3xl font-bold text-gray-800"></h2>
+                    <button id="back-to-list-btn" class="md:hidden bg-gray-200 hover:bg-gray-300 text-gray-700 py-1 px-3 rounded-md transition duration-300 ease-in-out">
+                        Back
+                    </button>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <div class="md:w-1/3">
+                        <img id="detail-business-image" src="https://placehold.co/400x200/cccccc/333333?text=Business+Image" alt="Business Image" class="w-full h-auto rounded-lg shadow-md object-cover">
+                    </div>
+                    <div class="md:w-2/3 space-y-2 text-gray-700">
+                        <p><strong class="font-medium">Category:</strong> <span id="detail-business-category"></span></p>
+                        <p><strong class="font-medium">Address:</strong> <span id="detail-business-address"></span></p>
+                        <p><strong class="font-medium">Phone:</strong> <span id="detail-business-phone"></span></p>
+                        <p><strong class="font-medium">Description:</strong> <span id="detail-business-description"></span></p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-semibold text-gray-800">Offers</h3>
+                    <button id="add-offer-btn" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                        Add Offer
+                    </button>
+                </div>
+                <div id="offer-list" class="space-y-3">
+                    <!-- Offers will be dynamically loaded here -->
+                </div>
+                <!-- Moved no-offers-message outside of offer-list div -->
+                <p id="no-offers-message" class="text-gray-500 text-center hidden mt-4">No offers available for this business.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals for Add Business and Add Offer Forms -->
+
+    <!-- Add Business Modal -->
+    <div id="add-business-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Add New Business</h2>
+            <form id="add-business-form" class="space-y-4">
+                <div>
+                    <label for="new-business-name" class="block text-sm font-medium text-gray-700">Business Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="new-business-name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label for="new-business-address" class="block text-sm font-medium text-gray-700">Address <span class="text-red-500">*</span></label>
+                    <input type="text" id="new-business-address" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label for="new-business-phone" class="block text-sm font-medium text-gray-700">Phone</label>
+                    <input type="tel" id="new-business-phone" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="new-business-description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea id="new-business-description" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                </div>
+                <div>
+                    <label for="new-business-category" class="block text-sm font-medium text-gray-700">Category <span class="text-red-500">*</span></label>
+                    <input type="text" id="new-business-category" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label for="new-business-image-url" class="block text-sm font-medium text-gray-700">Image URL (Optional)</label>
+                    <input type="text" id="new-business-image-url" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., https://placehold.co/400x200">
+                </div>
+                <div class="flex justify-end space-x-3 mt-4">
+                    <button type="button" id="cancel-add-business-btn" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-150 ease-in-out">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-150 ease-in-out">Add Business</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Offer Modal -->
+    <div id="add-offer-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Add New Offer for <span id="offer-business-name"></span></h2>
+            <form id="add-offer-form" class="space-y-4">
+                <div>
+                    <label for="new-offer-title" class="block text-sm font-medium text-gray-700">Offer Title <span class="text-red-500">*</span></label>
+                    <input type="text" id="new-offer-title" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label for="new-offer-description" class="block text-sm font-medium text-gray-700">Description <span class="text-red-500">*</span></label>
+                    <textarea id="new-offer-description" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required></textarea>
+                </div>
+                <div>
+                    <label for="new-offer-terms" class="block text-sm font-medium text-gray-700">Terms & Conditions</label>
+                    <textarea id="new-offer-terms" rows="2" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                </div>
+                <div>
+                    <label for="new-offer-expiration-date" class="block text-sm font-medium text-gray-700">Expiration Date <span class="text-red-500">*</span></label>
+                    <input type="date" id="new-offer-expiration-date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label for="new-offer-type" class="block text-sm font-medium text-gray-700">Offer Type <span class="text-red-500">*</span></label>
+                    <select id="new-offer-type" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                        <option value="discount">Discount</option>
+                        <option value="bogo">Buy One Get One</option>
+                        <option value="freebie">Freebie</option>
+                        <option value="percentage">Percentage Off</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3 mt-4">
+                    <button type="button" id="cancel-add-offer-btn" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-150 ease-in-out">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-150 ease-in-out">Add Offer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for in-memory data
+        let businesses = [];
+        let offers = [];
+        let selectedBusinessId = null;
+
+        // Sample Data (Pre-populated businesses and offers)
+        function generateUniqueId() {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function loadSampleData() {
+            // Sample Businesses
+            const business1Id = generateUniqueId();
+            const business2Id = generateUniqueId();
+            const business3Id = generateUniqueId();
+
+            businesses = [
+                {
+                    id: business1Id,
+                    name: "The Corner Cafe",
+                    address: "123 Main St, Anytown",
+                    phone: "555-123-4567",
+                    description: "Cozy cafe serving artisanal coffee, pastries, and light lunches.",
+                    category: "Food & Drink",
+                    imageUrl: "https://placehold.co/400x200/4CAF50/FFFFFF?text=Cafe"
+                },
+                {
+                    id: business2Id,
+                    name: "Bright Blooms Florist",
+                    address: "456 Oak Ave, Anytown",
+                    phone: "555-987-6543",
+                    description: "Your local source for fresh flowers, custom arrangements, and plant care.",
+                    category: "Retail",
+                    imageUrl: "https://placehold.co/400x200/8B5CF6/FFFFFF?text=Florist"
+                },
+                {
+                    id: business3Id,
+                    name: "Auto Fix Pros",
+                    address: "789 Garage Rd, Anytown",
+                    phone: "555-333-2222",
+                    description: "Reliable auto repair and maintenance services for all makes and models.",
+                    category: "Services",
+                    imageUrl: "https://placehold.co/400x200/F59E0B/FFFFFF?text=Auto+Repair"
+                },
+                {
+                    id: generateUniqueId(),
+                    name: "Yoga Harmony Studio",
+                    address: "101 Serene Ln, Anytown",
+                    phone: "555-777-8888",
+                    description: "Find your inner peace with our variety of yoga classes for all levels.",
+                    category: "Health & Wellness",
+                    imageUrl: "https://placehold.co/400x200/EC4899/FFFFFF?text=Yoga"
+                },
+                {
+                    id: generateUniqueId(),
+                    name: "Bookworm's Paradise",
+                    address: "202 Fiction Blvd, Anytown",
+                    phone: "555-111-2222",
+                    description: "A wide selection of new and used books, plus cozy reading nooks.",
+                    category: "Retail",
+                    imageUrl: "https://placehold.co/400x200/60A5FA/FFFFFF?text=Books"
+                }
+            ];
+
+            // Sample Offers
+            offers = [
+                {
+                    id: generateUniqueId(),
+                    businessId: business1Id,
+                    title: "15% Off Your First Order!",
+                    description: "Enjoy a discount on any coffee or food item when you visit us for the first time.",
+                    terms: "Valid for new customers only. Cannot be combined with other offers.",
+                    expirationDate: "2025-12-31",
+                    offerType: "discount"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business2Id,
+                    title: "Free Delivery on Orders Over $50",
+                    description: "Get your beautiful flowers delivered to your door, no extra charge!",
+                    terms: "Minimum order of $50 required. Local delivery zone only.",
+                    expirationDate: "2025-10-31",
+                    offerType: "freebie"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business3Id,
+                    title: "Oil Change Special - Only $29.99",
+                    description: "Regular oil change service including filter replacement.",
+                    terms: "Synthetic oil extra. Appointment recommended.",
+                    expirationDate: "2025-11-15",
+                    offerType: "discount"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business1Id,
+                    title: "Buy One Muffin, Get One Free!",
+                    description: "Perfect for sharing or enjoying two yourself!",
+                    terms: "Valid on all muffin varieties. Limited time offer.",
+                    expirationDate: "2025-09-30",
+                    offerType: "bogo"
+                }
+            ];
+        }
+
+        // Message box utility
+        function showMessageBox(message, isError = false) {
+            const msgBox = document.getElementById('message-box');
+            msgBox.textContent = message;
+            msgBox.className = 'message-box show ' + (isError ? 'error' : '');
+            setTimeout(() => {
+                msgBox.classList.remove('show');
+            }, 3000);
+        }
+
+        // Render a single business card
+        function renderBusinessCard(business) {
+            const businessListDiv = document.getElementById('business-list');
+            const card = document.createElement('div');
+            card.className = 'business-card bg-gray-50 p-4 rounded-lg shadow-sm cursor-pointer hover:bg-indigo-50 transition duration-200 ease-in-out';
+            card.dataset.id = business.id;
+            card.innerHTML = `
+                <img src="${business.imageUrl || 'https://placehold.co/400x200/cccccc/333333?text=Business+Image'}" onerror="this.onerror=null;this.src='https://placehold.co/400x200/cccccc/333333?text=Business+Image';" alt="${business.name}" class="w-full h-32 object-cover rounded-md mb-3">
+                <h3 class="text-xl font-semibold text-gray-800">${business.name}</h3>
+                <p class="text-sm text-gray-600">${business.category}</p>
+                <p class="text-sm text-gray-500">${business.address}</p>
+            `;
+            card.addEventListener('click', () => displayBusinessDetail(business));
+            businessListDiv.appendChild(card);
+        }
+
+        // Function to render the list of businesses
+        function renderBusinessList(businessArray) {
+            const businessListDiv = document.getElementById('business-list');
+            businessListDiv.innerHTML = ''; // Clear existing list
+            const noBusinessesMessage = document.getElementById('no-businesses-message');
+
+            if (businessArray.length === 0) {
+                noBusinessesMessage.classList.remove('hidden');
+            } else {
+                noBusinessesMessage.classList.add('hidden');
+                businessArray.forEach(business => {
+                    renderBusinessCard(business);
+                });
+            }
+        }
+
+        // Display Business Details and Offers
+        function displayBusinessDetail(business) {
+            selectedBusinessId = business.id;
+            document.getElementById('business-detail-empty').classList.add('hidden');
+            document.getElementById('business-detail').classList.remove('hidden');
+
+            // Populate business details
+            document.getElementById('detail-business-name').textContent = business.name;
+            document.getElementById('detail-business-category').textContent = business.category;
+            document.getElementById('detail-business-address').textContent = business.address;
+            document.getElementById('detail-business-phone').textContent = business.phone || 'N/A';
+            document.getElementById('detail-business-description').textContent = business.description || 'No description provided.';
+            document.getElementById('detail-business-image').src = business.imageUrl || 'https://placehold.co/400x200/cccccc/333333?text=Business+Image';
+            document.getElementById('detail-business-image').alt = business.name;
+            // Add onerror for image fallback
+            document.getElementById('detail-business-image').onerror = function() { this.onerror=null; this.src='https://placehold.co/400x200/cccccc/333333?text=Business+Image'; };
+
+
+            // Show business detail section and hide list on small screens
+            if (window.innerWidth < 768) { // md breakpoint in Tailwind is 768px
+                document.querySelector('section:first-of-type').classList.add('hidden'); // Hide business list
+                document.querySelector('section:last-of-type').classList.remove('hidden'); // Show detail
+            }
+
+            // Render offers related to this business from the local 'offers' array
+            const offerListDiv = document.getElementById('offer-list');
+            const noOffersMessage = document.getElementById('no-offers-message');
+            offerListDiv.innerHTML = ''; // Clear existing offers
+
+            const currentBusinessOffers = offers.filter(offer => offer.businessId === business.id);
+
+            if (currentBusinessOffers.length === 0) {
+                noOffersMessage.classList.remove('hidden');
+            } else {
+                noOffersMessage.classList.add('hidden');
+                currentBusinessOffers.forEach(offer => {
+                    renderOfferCard(offer);
+                });
+            }
+
+            // Set the business name in the add offer modal title
+            document.getElementById('offer-business-name').textContent = business.name;
+        }
+
+        // Render a single offer card
+        function renderOfferCard(offer) {
+            const offerListDiv = document.getElementById('offer-list');
+            const card = document.createElement('div');
+            card.className = 'bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200';
+            card.innerHTML = `
+                <h4 class="text-xl font-semibold text-blue-800">${offer.title}</h4>
+                <p class="text-gray-700 mt-1">${offer.description}</p>
+                <p class="text-sm text-gray-600 mt-2"><strong>Type:</strong> ${offer.offerType}</p>
+                <p class="text-sm text-gray-600"><strong>Expires:</strong> ${offer.expirationDate}</p>
+                ${offer.terms ? `<p class="text-xs text-gray-500 mt-1"><em>Terms: ${offer.terms}</em></p>` : ''}
+            `;
+            offerListDiv.appendChild(card);
+        }
+
+        // Handle Add Business Form Submission
+        document.getElementById('add-business-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('new-business-name').value.trim();
+            const address = document.getElementById('new-business-address').value.trim();
+            const phone = document.getElementById('new-business-phone').value.trim();
+            const description = document.getElementById('new-business-description').value.trim();
+            const category = document.getElementById('new-business-category').value.trim();
+            const imageUrl = document.getElementById('new-business-image-url').value.trim();
+
+            if (!name || !address || !category) {
+                showMessageBox("Please fill in all required fields (Name, Address, Category).", true);
+                return;
+            }
+
+            const newBusiness = {
+                id: generateUniqueId(), // Generate a unique ID for the new business
+                name,
+                address,
+                phone,
+                description,
+                category,
+                imageUrl: imageUrl || 'https://placehold.co/400x200/cccccc/333333?text=New+Business',
+                createdAt: new Date().toISOString(),
+            };
+
+            businesses.push(newBusiness); // Add to local array
+            renderBusinessList(businesses); // Re-render the list to include the new business
+            showMessageBox("Business added successfully!");
+            document.getElementById('add-business-modal').classList.add('hidden');
+            e.target.reset(); // Clear form
+        });
+
+        // Handle Add Offer Form Submission
+        document.getElementById('add-offer-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!selectedBusinessId) {
+                showMessageBox("Error: No business selected to add an offer.", true);
+                return;
+            }
+
+            const title = document.getElementById('new-offer-title').value.trim();
+            const description = document.getElementById('new-offer-description').value.trim();
+            const terms = document.getElementById('new-offer-terms').value.trim();
+            const expirationDate = document.getElementById('new-offer-expiration-date').value;
+            const offerType = document.getElementById('new-offer-type').value;
+
+            if (!title || !description || !expirationDate || !offerType) {
+                showMessageBox("Please fill in all required fields.", true);
+                return;
+            }
+
+            const newOffer = {
+                id: generateUniqueId(),
+                businessId: selectedBusinessId,
+                title,
+                description,
+                terms,
+                expirationDate,
+                offerType,
+                createdAt: new Date().toISOString(),
+            };
+
+            offers.push(newOffer); // Add to local array
+            // Re-render offers for the currently selected business
+            const currentBusiness = businesses.find(b => b.id === selectedBusinessId);
+            if (currentBusiness) {
+                displayBusinessDetail(currentBusiness); // Re-display details to update offers
+            }
+
+            showMessageBox("Offer added successfully!");
+            document.getElementById('add-offer-modal').classList.add('hidden');
+            e.target.reset(); // Clear form
+        });
+
+        // Search Functionality
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const queryText = e.target.value.toLowerCase();
+            const filteredBusinesses = businesses.filter(business =>
+                business.name.toLowerCase().includes(queryText) ||
+                business.category.toLowerCase().includes(queryText) ||
+                business.description.toLowerCase().includes(queryText)
+            );
+            renderBusinessList(filteredBusinesses); // Render the filtered list
+        });
+
+        // Event Listeners for Modals
+        document.getElementById('add-business-btn').addEventListener('click', () => {
+            document.getElementById('add-business-modal').classList.remove('hidden');
+        });
+        document.getElementById('cancel-add-business-btn').addEventListener('click', () => {
+            document.getElementById('add-business-modal').classList.add('hidden');
+            document.getElementById('add-business-form').reset();
+        });
+
+        document.getElementById('add-offer-btn').addEventListener('click', () => {
+            if (!selectedBusinessId) {
+                showMessageBox("Please select a business first to add an offer.", false);
+                return;
+            }
+            document.getElementById('add-offer-modal').classList.remove('hidden');
+        });
+        document.getElementById('cancel-add-offer-btn').addEventListener('click', () => {
+            document.getElementById('add-offer-modal').classList.add('hidden');
+            document.getElementById('add-offer-form').reset();
+        });
+
+        // Back to list button for mobile
+        document.getElementById('back-to-list-btn').addEventListener('click', () => {
+            document.querySelector('section:first-of-type').classList.remove('hidden'); // Show business list
+            document.querySelector('section:last-of-type').classList.add('hidden'); // Hide detail
+        });
+
+        // Initial setup on window load
+        window.onload = function() {
+            loadSampleData();
+            renderBusinessList(businesses);
+            // Initially hide the loading spinner and show no businesses message if applicable
+            document.getElementById('loading-spinner').classList.add('hidden');
+            if (businesses.length === 0) {
+                document.getElementById('no-businesses-message').classList.remove('hidden');
+            }
+        };
+    </script>
+</body>
+</html>
