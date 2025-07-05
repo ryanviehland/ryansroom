@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local Businesses & Offers</title>
-    <!-- Tailwind CSS CDN -->
+    <title>STL Deals - Local Businesses & Offers</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Custom styles for Inter font and general layout */
         body {
@@ -58,17 +58,158 @@
             overflow-y: auto; /* Allow scrolling for long forms */
             max-height: 90vh; /* Limit modal height */
         }
+
+        /* Custom styles for Navbar Hover Effect */
+        .nav-link-circle-effect {
+            position: relative;
+            overflow: hidden;
+            display: inline-flex; /* Use flex to align text and pseudo-element */
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.75rem; /* Adjust padding as needed */
+            border-radius: 0.375rem; /* For rounded corners */
+            transition: color 0.3s ease-in-out;
+        }
+
+        .nav-link-circle-effect::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background-color: rgba(255, 255, 255, 0.2); /* Slightly transparent white circle */
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease-out, height 0.3s ease-out;
+            z-index: -1; /* Place behind text */
+        }
+
+        .nav-link-circle-effect:hover::before {
+            width: 150%; /* Make it large enough to cover the link */
+            height: 150%; /* Make it large enough to cover the link */
+        }
+
+        /* Slideshow Specific Styles */
+        .slideshow-container {
+            position: relative;
+            max-width: 100%;
+            margin: auto;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .mySlides {
+            display: none;
+            width: 100%;
+            height: 400px; /* Fixed height for consistency */
+            object-fit: cover; /* Cover the area, potentially cropping */
+        }
+
+        .mySlides.active {
+            display: block;
+        }
+
+        /* Fade animation */
+        .fade {
+            animation-name: fade;
+            animation-duration: 1.5s;
+        }
+
+        @keyframes fade {
+            from {opacity: .4}
+            to {opacity: 1}
+        }
+
+        /* Next & previous buttons */
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            padding: 16px;
+            margin-top: -22px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.6s ease;
+            border-radius: 0 3px 3px 0;
+            user-select: none;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        /* Position the "next button" to the right */
+        .next {
+            right: 0;
+            border-radius: 3px 0 0 3px;
+        }
+
+        /* On hover, add a black background with a little more opacity */
+        .prev:hover, .next:hover {
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        /* The dots/bullets/indicators */
+        .dot-container {
+            text-align: center;
+            padding: 20px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        .dot {
+            cursor: pointer;
+            height: 15px;
+            width: 15px;
+            margin: 0 2px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.6s ease;
+        }
+
+        .dot.active, .dot:hover {
+            background-color: #717171;
+        }
+
+        /* Caption text for slideshow - optional */
+        .text-overlay {
+            color: #f2f2f2;
+            font-size: 24px;
+            padding: 8px 12px;
+            position: absolute;
+            bottom: 60px; /* Above the dots */
+            width: 100%;
+            text-align: center;
+            background-color: rgba(0,0,0,0.4);
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
     <div id="message-box" class="message-box"></div>
 
-    <!-- Header -->
     <header class="bg-indigo-600 text-white p-4 shadow-md">
         <div class="container mx-auto flex flex-col sm:flex-row items-center justify-between">
-            <h1 class="text-3xl font-bold mb-2 sm:mb-0">Local Deals</h1>
-            <div class="flex items-center space-x-4">
-                <!-- User ID display removed as Firebase is no longer used -->
+            <div class="flex flex-col sm:flex-row items-center mb-2 sm:mb-0">
+                <img src="http://googleusercontent.com/image_generation_content/0" alt="STL Deals Logo" class="h-16 w-auto mr-0 sm:mr-4 mb-2 sm:mb-0">
+                <h1 class="text-3xl font-bold sr-only">STL Deals</h1></div>
+
+            <nav class="flex-grow flex justify-center sm:justify-start">
+                <ul class="flex space-x-6 text-lg">
+                    <li><a href="#" class="nav-link-circle-effect">Home</a></li>
+                    <li><a href="#" class="nav-link-circle-effect">Categories</a></li>
+                    <li><a href="#" class="nav-link-circle-effect">About Us</a></li>
+                    <li><a href="#" class="nav-link-circle-effect">Contact</a></li>
+                </ul>
+            </nav>
+            
+            <div class="flex items-center mt-4 sm:mt-0">
                 <button id="add-business-btn" class="bg-indigo-700 hover:bg-indigo-800 text-white py-2 px-4 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
                     Add Business
                 </button>
@@ -76,9 +217,17 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="container mx-auto p-4 flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Business List Section -->
+    <section class="container mx-auto mt-6 px-4">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4 text-center">Featured Deals!</h2>
+        <div class="slideshow-container">
+            <div class="dot-container">
+                </div>
+            <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+            <a class="next" onclick="plusSlides(1)">&#10095;</a>
+        </div>
+    </section>
+
+    <main class="container mx-auto p-4 flex-grow grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         <section class="md:col-span-1 bg-white p-4 rounded-lg shadow-md flex flex-col">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Businesses</h2>
             <div class="mb-4">
@@ -93,13 +242,10 @@
                 Loading businesses...
             </div>
             <div id="business-list" class="space-y-4 overflow-y-auto flex-grow pr-2">
-                <!-- Business cards will be dynamically loaded here -->
-            </div>
-            <!-- Moved no-businesses-message outside of business-list div -->
+                </div>
             <p id="no-businesses-message" class="text-gray-500 text-center hidden mt-4">No businesses found. Be the first to add one!</p>
         </section>
 
-        <!-- Business Detail Section -->
         <section class="md:col-span-2 bg-white p-4 rounded-lg shadow-md flex flex-col">
             <div id="business-detail-empty" class="text-center text-gray-500 py-20">
                 <p class="text-lg">Select a business from the left to view its details and offers.</p>
@@ -131,17 +277,12 @@
                     </button>
                 </div>
                 <div id="offer-list" class="space-y-3">
-                    <!-- Offers will be dynamically loaded here -->
-                </div>
-                <!-- Moved no-offers-message outside of offer-list div -->
+                    </div>
                 <p id="no-offers-message" class="text-gray-500 text-center hidden mt-4">No offers available for this business.</p>
             </div>
         </section>
     </main>
 
-    <!-- Modals for Add Business and Add Offer Forms -->
-
-    <!-- Add Business Modal -->
     <div id="add-business-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 class="text-2xl font-bold mb-4 text-gray-800">Add New Business</h2>
@@ -178,7 +319,6 @@
         </div>
     </div>
 
-    <!-- Add Offer Modal -->
     <div id="add-offer-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 class="text-2xl font-bold mb-4 text-gray-800">Add New Offer for <span id="offer-business-name"></span></h2>
@@ -209,6 +349,10 @@
                         <option value="other">Other</option>
                     </select>
                 </div>
+                <div>
+                    <label for="new-offer-image-url" class="block text-sm font-medium text-gray-700">Image URL (Optional)</label>
+                    <input type="text" id="new-offer-image-url" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., https://placehold.co/800x400/FF0000/FFFFFF?text=Awesome+Deal">
+                </div>
                 <div class="flex justify-end space-x-3 mt-4">
                     <button type="button" id="cancel-add-offer-btn" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-150 ease-in-out">Cancel</button>
                     <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-150 ease-in-out">Add Offer</button>
@@ -223,93 +367,124 @@
         let offers = [];
         let selectedBusinessId = null;
 
-        // Sample Data (Pre-populated businesses and offers)
+        // Slideshow variables
+        let slideIndex = 0;
+        let slideshowInterval;
+        const slideShowOffers = []; // Offers specifically chosen for the slideshow
+
+        // Utility function to generate unique IDs
         function generateUniqueId() {
             return '_' + Math.random().toString(36).substr(2, 9);
         }
 
+        // --- Data Loading ---
         function loadSampleData() {
             // Sample Businesses
             const business1Id = generateUniqueId();
             const business2Id = generateUniqueId();
             const business3Id = generateUniqueId();
+            const business4Id = generateUniqueId();
+            const business5Id = generateUniqueId();
+            const business6Id = generateUniqueId();
+            const business7Id = generateUniqueId();
+            const business8Id = generateUniqueId();
+            const business9Id = generateUniqueId();
 
             businesses = [
                 {
                     id: business1Id,
-                    name: "The Corner Cafe",
-                    address: "123 Main St, Anytown",
-                    phone: "555-123-4567",
-                    description: "Cozy cafe serving artisanal coffee, pastries, and light lunches.",
+                    name: "Sunny Street Cafe",
+                    address: "123 Main St, St. Louis, MO",
+                    phone: "314-123-4567",
+                    description: "Cozy cafe serving artisanal coffee, pastries, and delicious breakfast/lunch.",
                     category: "Food & Drink",
-                    imageUrl: "https://placehold.co/400x200/4CAF50/FFFFFF?text=Cafe"
+                    imageUrl: "https://placehold.co/400x200/4CAF50/FFFFFF?text=Sunny+Cafe"
                 },
                 {
                     id: business2Id,
-                    name: "Bright Blooms Florist",
-                    address: "456 Oak Ave, Anytown",
-                    phone: "555-987-6543",
+                    name: "Arnold Florist",
+                    address: "456 Oak Ave, Arnold, MO",
+                    phone: "636-987-6543",
                     description: "Your local source for fresh flowers, custom arrangements, and plant care.",
                     category: "Retail",
-                    imageUrl: "https://placehold.co/400x200/8B5CF6/FFFFFF?text=Florist"
+                    imageUrl: "https://placehold.co/400x200/8B5CF6/FFFFFF?text=Arnold+Florist"
                 },
                 {
                     id: business3Id,
-                    name: "Auto Fix Pros",
-                    address: "789 Garage Rd, Anytown",
-                    phone: "555-333-2222",
-                    description: "Reliable auto repair and maintenance services for all makes and models.",
+                    name: "Valvoline Instant Oil Change",
+                    address: "789 Garage Rd, St. Louis, MO",
+                    phone: "314-333-2222",
+                    description: "Quick and reliable auto maintenance services including oil changes and tire rotations.",
                     category: "Services",
-                    imageUrl: "https://placehold.co/400x200/F59E0B/FFFFFF?text=Auto+Repair"
+                    imageUrl: "https://placehold.co/400x200/F59E0B/FFFFFF?text=Valvoline"
                 },
                 {
-                    id: generateUniqueId(),
+                    id: business4Id,
+                    name: "Jiffy Lube",
+                    address: "101 Quick St, St. Louis, MO",
+                    phone: "314-555-1111",
+                    description: "Fast and professional oil changes, vehicle inspections, and routine maintenance.",
+                    category: "Services",
+                    imageUrl: "https://placehold.co/400x200/F59E0B/FFFFFF?text=Jiffy+Lube"
+                },
+                {
+                    id: business5Id,
+                    name: "Meineke Car Care Center",
+                    address: "202 Auto Blvd, St. Louis, MO",
+                    phone: "314-777-9999",
+                    description: "Comprehensive car care services from brakes to exhaust and more.",
+                    category: "Services",
+                    imageUrl: "https://placehold.co/400x200/F59E0B/FFFFFF?text=Meineke"
+                },
+                {
+                    id: business6Id,
+                    name: "Midas Auto Service",
+                    address: "303 Wheel Dr, St. Louis, MO",
+                    phone: "314-222-3333",
+                    description: "Trusted auto repair for brakes, tires, oil changes, and more.",
+                    category: "Services",
+                    imageUrl: "https://placehold.co/400x200/F59E0B/FFFFFF?text=Midas"
+                },
+                {
+                    id: business7Id,
+                    name: "Dobbs Tire and Auto Centers",
+                    address: "404 Tire Rd, St. Louis, MO",
+                    phone: "314-888-4444",
+                    description: "Expert tire services and complete automotive repairs for all vehicles.",
+                    category: "Services",
+                    imageUrl: "https://placehold.co/400x200/F59E0B/FFFFFF?text=Dobbs+Tire"
+                },
+                {
+                    id: business8Id,
                     name: "Yoga Harmony Studio",
-                    address: "101 Serene Ln, Anytown",
-                    phone: "555-777-8888",
+                    address: "101 Serene Ln, St. Louis, MO",
+                    phone: "314-777-8888",
                     description: "Find your inner peace with our variety of yoga classes for all levels.",
                     category: "Health & Wellness",
-                    imageUrl: "https://placehold.co/400x200/EC4899/FFFFFF?text=Yoga"
+                    imageUrl: "https://placehold.co/400x200/EC4899/FFFFFF?text=Yoga+Harmony"
                 },
                 {
-                    id: generateUniqueId(),
+                    id: business9Id,
                     name: "Bookworm's Paradise",
-                    address: "202 Fiction Blvd, Anytown",
-                    phone: "555-111-2222",
+                    address: "202 Fiction Blvd, St. Louis, MO",
+                    phone: "314-111-2222",
                     description: "A wide selection of new and used books, plus cozy reading nooks.",
                     category: "Retail",
-                    imageUrl: "https://placehold.co/400x200/60A5FA/FFFFFF?text=Books"
+                    imageUrl: "https://placehold.co/400x200/60A5FA/FFFFFF?text=Bookworm"
                 }
             ];
 
-            // Sample Offers
+            // Sample Offers with Image URLs
             offers = [
                 {
                     id: generateUniqueId(),
                     businessId: business1Id,
-                    title: "15% Off Your First Order!",
-                    description: "Enjoy a discount on any coffee or food item when you visit us for the first time.",
+                    title: "15% Off Your First Coffee!",
+                    description: "Enjoy a discount on any coffee or specialty drink when you visit us for the first time.",
                     terms: "Valid for new customers only. Cannot be combined with other offers.",
                     expirationDate: "2025-12-31",
-                    offerType: "discount"
-                },
-                {
-                    id: generateUniqueId(),
-                    businessId: business2Id,
-                    title: "Free Delivery on Orders Over $50",
-                    description: "Get your beautiful flowers delivered to your door, no extra charge!",
-                    terms: "Minimum order of $50 required. Local delivery zone only.",
-                    expirationDate: "2025-10-31",
-                    offerType: "freebie"
-                },
-                {
-                    id: generateUniqueId(),
-                    businessId: business3Id,
-                    title: "Oil Change Special - Only $29.99",
-                    description: "Regular oil change service including filter replacement.",
-                    terms: "Synthetic oil extra. Appointment recommended.",
-                    expirationDate: "2025-11-15",
-                    offerType: "discount"
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/4CAF50/FFFFFF?text=15%25+OFF+COFFEE"
                 },
                 {
                     id: generateUniqueId(),
@@ -318,12 +493,156 @@
                     description: "Perfect for sharing or enjoying two yourself!",
                     terms: "Valid on all muffin varieties. Limited time offer.",
                     expirationDate: "2025-09-30",
-                    offerType: "bogo"
+                    offerType: "bogo",
+                    imageUrl: "https://placehold.co/800x400/4CAF50/FFFFFF?text=BOGO+MUFFIN"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business2Id,
+                    title: "Free Local Flower Delivery",
+                    description: "Get your beautiful flowers delivered to your door, no extra charge on orders over $50!",
+                    terms: "Minimum order of $50 required. Local delivery zone only.",
+                    expirationDate: "2025-10-31",
+                    offerType: "freebie",
+                    imageUrl: "https://placehold.co/800x400/8B5CF6/FFFFFF?text=FREE+FLOWER+DELIVERY"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business2Id,
+                    title: "Online Bouquet Special: $39.99",
+                    description: "Exclusive price on selected online-order bouquets.",
+                    terms: "Online Order Only. While supplies last.",
+                    expirationDate: "2025-10-31",
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/8B5CF6/FFFFFF?text=BOUQUET+SPECIAL+%2439.99"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business3Id,
+                    title: "Oil Change Special - Only $29.99",
+                    description: "Regular oil change service including filter replacement.",
+                    terms: "Synthetic oil extra. Appointment recommended.",
+                    expirationDate: "2025-11-15",
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/F59E0B/FFFFFF?text=OIL+CHANGE+%2429.99"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business3Id,
+                    title: "$20.00 Off Transmission Flush",
+                    description: "Save big on a complete transmission fluid flush service.",
+                    terms: "Valid for most vehicles. See store for details.",
+                    expirationDate: "2025-11-15",
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/F59E0B/FFFFFF?text=%2420+OFF+TRANSMISSION"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business4Id,
+                    title: "$30 Off Full Synthetic Oil Change",
+                    description: "Premium oil change service with full synthetic oil.",
+                    terms: "Appointment recommended.",
+                    expirationDate: "2025-11-15",
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/F59E0B/FFFFFF?text=%2430+OFF+SYNTHETIC"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business4Id,
+                    title: "$10 Off Windshield Wiper Replacement",
+                    description: "Online Special: Get new wipers installed.",
+                    terms: "Show offer on phone. Excludes special order wipers.",
+                    expirationDate: "2025-11-15",
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/F59E0B/FFFFFF?text=%2410+OFF+WIPERS"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business5Id,
+                    title: "$20 Off Conventional Oil Change",
+                    description: "Basic oil change service for most cars.",
+                    terms: "Not valid with other offers.",
+                    expirationDate: "2025-11-15",
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/F59E0B/FFFFFF?text=%2420+OFF+OIL+CHANGE"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business5Id,
+                    title: "$15 Off Battery Replacement",
+                    description: "Get a new car battery installed at a discount.",
+                    terms: "With purchase of new battery. Installation included.",
+                    expirationDate: "2025-11-15",
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/F59E0B/FFFFFF?text=%2415+OFF+BATTERY"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business6Id,
+                    title: "$20 Off Any Service Over $100",
+                    description: "Save on any repair or maintenance service.",
+                    terms: "Minimum spend of $100. One per customer.",
+                    expirationDate: "2025-11-15",
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/F59E0B/FFFFFF?text=%2420+OFF+SERVICE"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business6Id,
+                    title: "Free Tire Rotation with Oil Change",
+                    description: "Get your tires rotated for free when you get an oil change.",
+                    terms: "Valid on conventional and synthetic oil changes.",
+                    expirationDate: "2025-11-15",
+                    offerType: "freebie",
+                    imageUrl: "https://placehold.co/800x400/F59E0B/FFFFFF?text=FREE+TIRE+ROTATION"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business7Id,
+                    title: "$50 Off Brake Pad Replacement",
+                    description: "Replace your worn-out brake pads and save.",
+                    terms: "Parts and labor additional. Most vehicles.",
+                    expirationDate: "2025-11-15",
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/F59E0B/FFFFFF?text=%2450+OFF+BRAKES"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business7Id,
+                    title: "$75 Off Fuel System Cleaning Service",
+                    description: "Improve your car's performance and fuel efficiency.",
+                    terms: "Professional service. Results may vary.",
+                    expirationDate: "2025-11-15",
+                    offerType: "discount",
+                    imageUrl: "https://placehold.co/800x400/F59E0B/FFFFFF?text=%2475+OFF+FUEL+CLEAN"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business8Id,
+                    title: "First Yoga Class Free!",
+                    description: "Experience a complimentary session to kickstart your wellness journey.",
+                    terms: "New students only. Online registration required.",
+                    expirationDate: "2025-12-31",
+                    offerType: "freebie",
+                    imageUrl: "https://placehold.co/800x400/EC4899/FFFFFF?text=FREE+YOGA+CLASS"
+                },
+                {
+                    id: generateUniqueId(),
+                    businessId: business9Id,
+                    title: "20% Off Any Used Book",
+                    description: "Expand your library with great reads at a discount.",
+                    terms: "Excludes new releases. Cannot be combined with other offers.",
+                    expirationDate: "2025-11-30",
+                    offerType: "percentage",
+                    imageUrl: "https://placehold.co/800x400/60A5FA/FFFFFF?text=20%25+OFF+USED+BOOKS"
                 }
             ];
+
+            // Select some offers for the slideshow based on having an image
+            slideShowOffers.push(...offers.filter(offer => offer.imageUrl));
         }
 
-        // Message box utility
+        // --- Message Box Utility ---
         function showMessageBox(message, isError = false) {
             const msgBox = document.getElementById('message-box');
             msgBox.textContent = message;
@@ -333,7 +652,7 @@
             }, 3000);
         }
 
-        // Render a single business card
+        // --- Business List Rendering ---
         function renderBusinessCard(business) {
             const businessListDiv = document.getElementById('business-list');
             const card = document.createElement('div');
@@ -349,7 +668,6 @@
             businessListDiv.appendChild(card);
         }
 
-        // Function to render the list of businesses
         function renderBusinessList(businessArray) {
             const businessListDiv = document.getElementById('business-list');
             businessListDiv.innerHTML = ''; // Clear existing list
@@ -365,7 +683,7 @@
             }
         }
 
-        // Display Business Details and Offers
+        // --- Business Detail & Offer Display ---
         function displayBusinessDetail(business) {
             selectedBusinessId = business.id;
             document.getElementById('business-detail-empty').classList.add('hidden');
@@ -379,9 +697,7 @@
             document.getElementById('detail-business-description').textContent = business.description || 'No description provided.';
             document.getElementById('detail-business-image').src = business.imageUrl || 'https://placehold.co/400x200/cccccc/333333?text=Business+Image';
             document.getElementById('detail-business-image').alt = business.name;
-            // Add onerror for image fallback
             document.getElementById('detail-business-image').onerror = function() { this.onerror=null; this.src='https://placehold.co/400x200/cccccc/333333?text=Business+Image'; };
-
 
             // Show business detail section and hide list on small screens
             if (window.innerWidth < 768) { // md breakpoint in Tailwind is 768px
@@ -409,22 +725,23 @@
             document.getElementById('offer-business-name').textContent = business.name;
         }
 
-        // Render a single offer card
         function renderOfferCard(offer) {
             const offerListDiv = document.getElementById('offer-list');
             const card = document.createElement('div');
-            card.className = 'bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200';
+            card.className = 'bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200 flex items-center space-x-4'; // Added flex for image
             card.innerHTML = `
-                <h4 class="text-xl font-semibold text-blue-800">${offer.title}</h4>
-                <p class="text-gray-700 mt-1">${offer.description}</p>
-                <p class="text-sm text-gray-600 mt-2"><strong>Type:</strong> ${offer.offerType}</p>
-                <p class="text-sm text-gray-600"><strong>Expires:</strong> ${offer.expirationDate}</p>
-                ${offer.terms ? `<p class="text-xs text-gray-500 mt-1"><em>Terms: ${offer.terms}</em></p>` : ''}
+                <img src="${offer.imageUrl || 'https://placehold.co/100x100/A0D9F7/000000?text=Deal'}" onerror="this.onerror=null;this.src='https://placehold.co/100x100/A0D9F7/000000?text=Deal';" alt="${offer.title}" class="w-24 h-24 object-cover rounded-md flex-shrink-0">
+                <div>
+                    <h4 class="text-xl font-semibold text-blue-800">${offer.title}</h4>
+                    <p class="text-gray-700 mt-1">${offer.description}</p>
+                    <p class="text-sm text-gray-600 mt-2"><strong>Type:</strong> ${offer.offerType} | <strong>Expires:</strong> ${offer.expirationDate}</p>
+                    ${offer.terms ? `<p class="text-xs text-gray-500 mt-1"><em>Terms: ${offer.terms}</em></p>` : ''}
+                </div>
             `;
             offerListDiv.appendChild(card);
         }
 
-        // Handle Add Business Form Submission
+        // --- Form Submission Handlers ---
         document.getElementById('add-business-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -441,7 +758,7 @@
             }
 
             const newBusiness = {
-                id: generateUniqueId(), // Generate a unique ID for the new business
+                id: generateUniqueId(),
                 name,
                 address,
                 phone,
@@ -451,29 +768,29 @@
                 createdAt: new Date().toISOString(),
             };
 
-            businesses.push(newBusiness); // Add to local array
-            renderBusinessList(businesses); // Re-render the list to include the new business
+            businesses.push(newBusiness);
+            renderBusinessList(businesses);
             showMessageBox("Business added successfully!");
             document.getElementById('add-business-modal').classList.add('hidden');
-            e.target.reset(); // Clear form
+            e.target.reset();
         });
 
-        // Handle Add Offer Form Submission
         document.getElementById('add-offer-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            if (!selectedBusinessId) {
-                showMessageBox("Error: No business selected to add an offer.", true);
-                return;
-            }
 
             const title = document.getElementById('new-offer-title').value.trim();
             const description = document.getElementById('new-offer-description').value.trim();
             const terms = document.getElementById('new-offer-terms').value.trim();
             const expirationDate = document.getElementById('new-offer-expiration-date').value;
             const offerType = document.getElementById('new-offer-type').value;
+            const imageUrl = document.getElementById('new-offer-image-url').value.trim();
 
             if (!title || !description || !expirationDate || !offerType) {
-                showMessageBox("Please fill in all required fields.", true);
+                showMessageBox("Please fill in all required fields for the offer.", true);
+                return;
+            }
+            if (!selectedBusinessId) {
+                showMessageBox("Error: No business selected to add an offer to.", true);
                 return;
             }
 
@@ -485,69 +802,167 @@
                 terms,
                 expirationDate,
                 offerType,
+                imageUrl: imageUrl || 'https://placehold.co/800x400/A0D9F7/000000?text=New+Offer',
                 createdAt: new Date().toISOString(),
             };
 
-            offers.push(newOffer); // Add to local array
-            // Re-render offers for the currently selected business
+            offers.push(newOffer);
+            // Re-render the detail view to show the new offer
             const currentBusiness = businesses.find(b => b.id === selectedBusinessId);
             if (currentBusiness) {
-                displayBusinessDetail(currentBusiness); // Re-display details to update offers
+                displayBusinessDetail(currentBusiness);
+            }
+            // If the new offer has an image, add it to slideshow offers (if it isn't already)
+            if (newOffer.imageUrl && !slideShowOffers.some(o => o.id === newOffer.id)) {
+                slideShowOffers.push(newOffer);
+                renderSlideshow(); // Re-render slideshow
+                resetSlideshowAutoPlay(); // Restart autoplay with new slide
             }
 
             showMessageBox("Offer added successfully!");
             document.getElementById('add-offer-modal').classList.add('hidden');
-            e.target.reset(); // Clear form
+            e.target.reset();
         });
 
-        // Search Functionality
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            const queryText = e.target.value.toLowerCase();
-            const filteredBusinesses = businesses.filter(business =>
-                business.name.toLowerCase().includes(queryText) ||
-                business.category.toLowerCase().includes(queryText) ||
-                business.description.toLowerCase().includes(queryText)
-            );
-            renderBusinessList(filteredBusinesses); // Render the filtered list
-        });
+        // --- Slideshow Logic ---
+        function renderSlideshow() {
+            const slideshowContainer = document.querySelector('.slideshow-container');
+            const dotContainer = slideshowContainer.querySelector('.dot-container');
+            let slideHtml = '';
+            let dotHtml = '';
 
-        // Event Listeners for Modals
-        document.getElementById('add-business-btn').addEventListener('click', () => {
-            document.getElementById('add-business-modal').classList.remove('hidden');
-        });
-        document.getElementById('cancel-add-business-btn').addEventListener('click', () => {
-            document.getElementById('add-business-modal').classList.add('hidden');
-            document.getElementById('add-business-form').reset();
-        });
+            // Clear previous slides and dots
+            slideshowContainer.querySelectorAll('.mySlides').forEach(slide => slide.remove());
+            dotContainer.innerHTML = '';
 
-        document.getElementById('add-offer-btn').addEventListener('click', () => {
-            if (!selectedBusinessId) {
-                showMessageBox("Please select a business first to add an offer.", false);
+            if (slideShowOffers.length === 0) {
+                slideshowContainer.innerHTML = `<p class="text-center text-gray-500 py-20">No featured deals currently available.</p>`;
                 return;
             }
-            document.getElementById('add-offer-modal').classList.remove('hidden');
-        });
-        document.getElementById('cancel-add-offer-btn').addEventListener('click', () => {
-            document.getElementById('add-offer-modal').classList.add('hidden');
-            document.getElementById('add-offer-form').reset();
-        });
 
-        // Back to list button for mobile
-        document.getElementById('back-to-list-btn').addEventListener('click', () => {
-            document.querySelector('section:first-of-type').classList.remove('hidden'); // Show business list
-            document.querySelector('section:last-of-type').classList.add('hidden'); // Hide detail
-        });
+            slideShowOffers.forEach((offer, index) => {
+                slideHtml += `
+                    <div class="mySlides fade" data-slide-index="${index}">
+                        <img src="${offer.imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/800x400/cccccc/333333?text=Deal+Image';" style="width:100%; height:400px; object-fit: cover;">
+                        <div class="text-overlay">${offer.title}</div>
+                    </div>
+                `;
+                dotHtml += `<span class="dot" onclick="currentSlide(${index})"></span>`;
+            });
 
-        // Initial setup on window load
-        window.onload = function() {
+            slideshowContainer.insertAdjacentHTML('afterbegin', slideHtml); // Add slides
+            dotContainer.innerHTML = dotHtml; // Add dots
+
+            showSlides(slideIndex); // Show the initial slide
+            resetSlideshowAutoPlay(); // Start/reset autoplay
+        }
+
+        function showSlides(n) {
+            let i;
+            let slides = document.getElementsByClassName("mySlides");
+            let dots = document.getElementsByClassName("dot");
+            if (slides.length === 0) return; // No slides to show
+
+            if (n >= slides.length) { slideIndex = 0 }
+            if (n < 0) { slideIndex = slides.length - 1 }
+
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+                slides[i].classList.remove('active');
+            }
+            for (i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            slides[slideIndex].style.display = "block";
+            slides[slideIndex].classList.add('active');
+            dots[slideIndex].className += " active";
+        }
+
+        function plusSlides(n) {
+            clearInterval(slideshowInterval); // Stop auto-play on manual navigation
+            showSlides(slideIndex += n);
+            resetSlideshowAutoPlay(); // Restart auto-play
+        }
+
+        function currentSlide(n) {
+            clearInterval(slideshowInterval); // Stop auto-play on manual navigation
+            showSlides(slideIndex = n);
+            resetSlideshowAutoPlay(); // Restart auto-play
+        }
+
+        function resetSlideshowAutoPlay() {
+            clearInterval(slideshowInterval);
+            slideshowInterval = setInterval(() => {
+                if (slideShowOffers.length > 0) {
+                    plusSlides(1);
+                } else {
+                    clearInterval(slideshowInterval); // Stop if no offers
+                }
+            }, 5000); // Change image every 5 seconds
+        }
+
+        // --- Event Listeners and Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
             loadSampleData();
             renderBusinessList(businesses);
-            // Initially hide the loading spinner and show no businesses message if applicable
-            document.getElementById('loading-spinner').classList.add('hidden');
-            if (businesses.length === 0) {
-                document.getElementById('no-businesses-message').classList.remove('hidden');
-            }
-        };
+            renderSlideshow(); // Initialize slideshow
+
+            // Modals
+            const addBusinessBtn = document.getElementById('add-business-btn');
+            const addBusinessModal = document.getElementById('add-business-modal');
+            const cancelAddBusinessBtn = document.getElementById('cancel-add-business-btn');
+            const addOfferBtn = document.getElementById('add-offer-btn');
+            const addOfferModal = document.getElementById('add-offer-modal');
+            const cancelAddOfferBtn = document.getElementById('cancel-add-offer-btn');
+            const searchInput = document.getElementById('search-input');
+            const backToListBtn = document.getElementById('back-to-list-btn');
+
+            addBusinessBtn.addEventListener('click', () => addBusinessModal.classList.remove('hidden'));
+            cancelAddBusinessBtn.addEventListener('click', () => addBusinessModal.classList.add('hidden'));
+
+            addOfferBtn.addEventListener('click', () => {
+                if (selectedBusinessId) {
+                    addOfferModal.classList.remove('hidden');
+                } else {
+                    showMessageBox("Please select a business first to add an offer.", true);
+                }
+            });
+            cancelAddOfferBtn.addEventListener('click', () => addOfferModal.classList.add('hidden'));
+
+            searchInput.addEventListener('keyup', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredBusinesses = businesses.filter(business =>
+                    business.name.toLowerCase().includes(searchTerm) ||
+                    business.category.toLowerCase().includes(searchTerm) ||
+                    business.address.toLowerCase().includes(searchTerm)
+                );
+                renderBusinessList(filteredBusinesses);
+            });
+
+            // Handle back button for mobile detail view
+            backToListBtn.addEventListener('click', () => {
+                document.querySelector('section:first-of-type').classList.remove('hidden'); // Show business list
+                document.querySelector('section:last-of-type').classList.add('hidden'); // Hide detail
+                selectedBusinessId = null; // Clear selected business
+            });
+
+            // Handle window resize for detail view
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) { // If wider than md breakpoint
+                    document.querySelector('section:first-of-type').classList.remove('hidden'); // Always show list
+                    document.querySelector('section:last-of-type').classList.remove('hidden'); // Always show detail
+                } else {
+                    // On small screens, if a business is selected, keep list hidden
+                    if (selectedBusinessId) {
+                        document.querySelector('section:first-of-type').classList.add('hidden');
+                        document.querySelector('section:last-of-type').classList.remove('hidden');
+                    } else {
+                        document.querySelector('section:first-of-type').classList.remove('hidden');
+                        document.querySelector('section:last-of-type').classList.add('hidden');
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
